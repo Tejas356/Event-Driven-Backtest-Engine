@@ -1,5 +1,6 @@
 # The engine itself. Headers live in include/backtest, implementation here.
 add_library(backtest STATIC
+    data_handler.cpp
     version.cpp
 )
 
