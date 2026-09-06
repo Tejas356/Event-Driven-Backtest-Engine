@@ -1,10 +1,24 @@
-@"
+# Build output
 build/
-data/*.csv
-results/
-.vscode/
-*.o
-*.obj
+cmake-build-*/
 CMakeCache.txt
 CMakeFiles/
-"@ | Out-File -Encoding utf8 .gitignore
+*.o
+*.obj
+*.exe
+*.a
+*.lib
+
+# Data and results are regenerated, never committed
+data/*.csv
+results/
+
+# Editors
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
