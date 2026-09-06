@@ -247,3 +247,26 @@ Total parameter variations tried across the whole project: 22. Two forced by
 the plan (daily vs monthly, costs on vs off) and the 20 cells of this grid.
 None chosen to improve the headline figure, which remains the 252-day
 configuration fixed before any of this was run.
+
+---
+
+## Step 14 -- analysis and writeup
+
+`analysis/analyse.py` reads `results/` and writes five plots: log-scale equity
+gross against net, the underwater drawdown, rolling 12-month Sharpe,
+cumulative gross against net with the cost drag shaded, and the sweep
+heatmap.
+
+Its pandas summary is a third independent check on the engine, after the
+Step 7 validation and the sweep. It agrees exactly: return 1.95%, volatility
+4.83%, max drawdown 12.87%, cost drag 5,863.
+
+Two presentation choices worth recording:
+
+- Log scale on the equity plot. On a linear axis a 19-year curve makes the
+  last few years look like all the risk, because equal vertical distances
+  stop meaning equal returns.
+- Values printed in every heatmap cell. A heatmap whose colourbar has to be
+  decoded to compare two cells is decoration rather than evidence.
+
+Final state: 102 tests, clean build from scratch, all 14 steps committed.

@@ -9,9 +9,15 @@ CMakeFiles/
 *.a
 *.lib
 
-# Data and results are regenerated, never committed
+# Data is regenerated, never committed.
 data/*.csv
-results/
+
+# Results are regenerated too, except the plots the README links to -- a
+# README whose figures only exist on the machine that ran it is not a README.
+# Excluding the directory itself would stop git descending into it, so the
+# contents are excluded instead and the plots negated back in.
+results/*
+!results/*.png
 
 # Editors
 .vscode/
