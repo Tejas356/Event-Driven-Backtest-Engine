@@ -48,6 +48,23 @@ struct MetricsConfig {
     double periods_per_year = 252.0;
 };
 
+// Sharpe with no risk-free deduction.
+//
+// The engine credits no interest on idle cash, and this book holds a great
+// deal of it. Subtracting a risk-free rate from the return of a portfolio
+// that never earned one charges the strategy twice for the same cash drag.
+// The honest figure lies between this and the risk-free-adjusted Sharpe,
+// nearer this end the more of the book sits in cash -- so both are reported
+// rather than whichever happens to flatter.
+//
+// Derived rather than recomputed: the two differ by rf / annualised vol.
+inline double sharpe_without_risk_free(const PerformanceMetrics& metrics, double risk_free_rate) {
+    if (!(metrics.annualised_volatility > 0.0)) {
+        return 0.0;
+    }
+    return metrics.sharpe + risk_free_rate / metrics.annualised_volatility;
+}
+
 // Metrics of an arbitrary equity series, sampled once per trading day.
 PerformanceMetrics compute_performance(const std::vector<double>& equity,
                                        const std::vector<Timestamp>& dates,

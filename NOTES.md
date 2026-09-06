@@ -135,3 +135,73 @@ honest figure is between the two, nearer the former.
 Not resolved by quietly picking the flattering number. Step 12 reports both
 and says why; a financing model is out of scope and is listed as a
 limitation.
+
+---
+
+## Step 12 -- full backtest, headline result
+
+`./build/bin/run_backtest --config=config/default.toml`, 8 ETFs,
+2007-01-03 to 2026-09-04, 4950 bars, 237 rebalances, 1693 fills.
+
+| Metric | Gross | Net |
+|---|---|---|
+| Annualised return | 1.97% | 1.95% |
+| Annualised volatility | 4.82% | 4.83% |
+| Sharpe (rf 2%) | 0.014 | 0.009 |
+| Sharpe (no risk-free) | 0.428 | 0.423 |
+| Max drawdown | 12.80% | 12.87% |
+| Drawdown duration | 1599 days | 1599 days |
+| Skew | -0.193 | -0.193 |
+| Excess kurtosis | 4.63 | 4.64 |
+| Annualised turnover | | 259% |
+| Commission / slippage | | 2932 / 2932 |
+
+Final equity 1,460,329 from 1,000,000 over 19.64 years.
+
+### Against the calibration the plan gives
+
+| | Expected | Actual | |
+|---|---|---|---|
+| Net Sharpe | 0.4-0.9 | 0.42 (no rf) / 0.01 (rf 2%) | see below |
+| Annualised volatility | 8-15% | 4.83% | below |
+| Max drawdown | 15-30% | 12.87% | below |
+| Skew | positive or near zero | -0.19 | near zero |
+| Annualised turnover | 200-500% | 259% | in range |
+
+Volatility and drawdown are below the expected range, and the reason is in
+the plan itself rather than in the code. The sizing formula given is
+
+    weight_i = sign_i * (sigma_target / sigma_i) * (1 / N)
+
+with sigma_target described as 10% *per position*. With N = 8 that targets
+roughly 10%/sqrt(8) = 3.5% at portfolio level, not 8-15%. Realised 4.83% is
+consistent with that, once positive correlation between trend positions is
+allowed for. Reaching the stated band would mean dropping the 1/N or raising
+the target to about 0.28.
+
+**Not done.** Sharpe is scale-invariant, so levering the book up would move
+volatility and drawdown into the expected ranges without improving the result
+by a single basis point -- it would only make the table look more like the
+table. The formula as specified is what is implemented, and the discrepancy
+is recorded here instead.
+
+### The two Sharpe figures
+
+Both are reported because neither is right on its own. The engine credits no
+interest on idle cash, and at a mean gross exposure of 0.79 most of the book
+is cash. Subtracting a 2% risk-free rate therefore charges the strategy for a
+return it never earned, giving 0.009. Charging nothing gives 0.423. The
+honest figure is between, and nearer 0.423.
+
+Modelling cash interest properly would have meant a financing model, and
+would have broken the Step 7 validation that currently agrees with pandas to
+2.6e-16 unless the reference implementation grew one too. Listed as a
+limitation instead.
+
+### Parameter variations tried so far
+
+Two, both forced by the plan rather than chosen to improve the result:
+daily vs monthly rebalancing (Step 11), and costs on vs off (Steps 10-12).
+No parameter has yet been varied in search of a better number. Step 13 is the
+first place that happens, and it is a sweep reported in full rather than a
+search reported at its best point.

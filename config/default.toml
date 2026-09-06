@@ -1,0 +1,32 @@
+# Default backtest configuration.
+#
+# Simple `key = value` lines. Any key here can be overridden on the command
+# line as --key=value, which is how the sweep varies one parameter at a time.
+# An unknown key is an error rather than a warning: a silently ignored typo
+# is a run that did not do what its config says.
+
+symbols = DBC, EEM, EFA, GLD, IEF, SPY, TLT, UUP
+
+# Signal: sign of the trailing 12-month return.
+lookback = 252
+
+# Sizing: inverse volatility, 10% annualised per position, gross capped at 2x.
+volatility_halflife = 60
+volatility_seed = 20
+volatility_target = 0.10
+max_gross_leverage = 2.0
+
+# Schedule: last trading day of each month.
+monthly_rebalance = true
+
+# Portfolio.
+initial_capital = 1000000
+min_trade_fraction = 0.0005
+
+# Costs, per side, in basis points of traded notional. 2bp round trip is
+# deliberately pessimistic for liquid ETFs.
+commission_bps = 0.5
+slippage_bps = 0.5
+
+# Reporting. See the note in the metrics table about idle cash.
+risk_free_rate = 0.02
