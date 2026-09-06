@@ -4,3 +4,6 @@ target_link_libraries(run_backtest PRIVATE backtest strategies backtest_warnings
 
 add_executable(validate_buy_and_hold validate_buy_and_hold.cpp)
 target_link_libraries(validate_buy_and_hold PRIVATE backtest strategies backtest_warnings)
+
+add_executable(sweep sweep.cpp)
+target_link_libraries(sweep PRIVATE backtest strategies backtest_warnings)

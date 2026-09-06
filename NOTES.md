@@ -205,3 +205,45 @@ daily vs monthly rebalancing (Step 11), and costs on vs off (Steps 10-12).
 No parameter has yet been varied in search of a better number. Step 13 is the
 first place that happens, and it is a sweep reported in full rather than a
 search reported at its best point.
+
+---
+
+## Step 13 -- parameter sweep
+
+`./build/bin/sweep --config=config/default.toml`, 20 runs, 5 lookbacks x 4
+volatility targets, monthly rebalancing, 2bp round trip. Full grid in
+`results/sweep.csv`; the whole grid is reported, not its best cell.
+
+Net Sharpe, risk-free deduction removed (see the Step 12 note on idle cash):
+
+| Lookback | 0.05 | 0.10 | 0.15 | 0.20 | Turnover @0.10 |
+|---|---|---|---|---|---|
+| 63 | 0.507 | 0.509 | 0.511 | 0.502 | 546% |
+| 126 | 0.619 | 0.621 | 0.623 | 0.609 | 353% |
+| 189 | 0.488 | 0.490 | 0.493 | 0.486 | 304% |
+| 252 | 0.422 | 0.423 | 0.424 | 0.424 | 259% |
+| 378 | 0.537 | 0.536 | 0.536 | 0.531 | 253% |
+
+**There is a plateau.** All five lookbacks are positive and sit in a band of
+0.42 to 0.62. Nothing spikes: the best cell, 126 days, beats its neighbours
+by roughly 0.11 and 0.13, which is well inside what a Sharpe standard error
+over 19.6 years admits (about 1/sqrt(19.6) = 0.23). The result does not
+depend on the lookback being right.
+
+The 252-day value the literature uses is the *worst* of the five. That is
+worth stating plainly: had the plan not fixed 252 in advance, picking 126
+from this grid would have been fitting, and the honest reading is that the
+five values are indistinguishable.
+
+Rows are nearly flat across volatility targets, as they must be -- Sharpe is
+scale-invariant, and the target only changes the result through costs, which
+is why the 0.20 column is very slightly worse. Asserted as a code property in
+tests/test_robustness.cpp rather than left as an observation.
+
+Turnover falls monotonically with lookback, from 546% at 63 days to 253% at
+378. A shorter lookback flips sign more often and pays for it.
+
+Total parameter variations tried across the whole project: 22. Two forced by
+the plan (daily vs monthly, costs on vs off) and the 20 cells of this grid.
+None chosen to improve the headline figure, which remains the 252-day
+configuration fixed before any of this was run.
