@@ -14,6 +14,11 @@ RunStatistics Engine::run() {
         }
 
         // Drain everything that happens at this timestamp before time moves.
+        // Two passes: the first processes market events and the fills they
+        // release, the second the signals raised once the whole universe is
+        // marked to market at today close.
+        bool bar_closed = false;
+        while (true) {
         while (auto event = queue_.pop()) {
             std::visit(
                 Overloaded{
@@ -54,6 +59,16 @@ RunStatistics Engine::run() {
                     },
                 },
                 *event);
+        }
+
+            if (bar_closed) {
+                break;
+            }
+            bar_closed = true;
+            for (const SignalEvent& signal : strategy_.on_bar_close(data_.current_time(), data_)) {
+                ++stats.signals;
+                queue_.push(signal);
+            }
         }
 
         portfolio_.record_equity(data_.current_time());

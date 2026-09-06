@@ -267,6 +267,17 @@ std::span<const Bar> DataHandler::latest_bars(const Symbol& symbol, std::size_t 
     return std::span<const Bar>(s.bars.data() + (available - count), count);
 }
 
+bool DataHandler::traded(const Symbol& symbol) const {
+    if (cursor_ == kBeforeStart) {
+        return false;
+    }
+    const auto it = series_.find(symbol);
+    if (it == series_.end() || cursor_ < it->second.start_index) {
+        return false;
+    }
+    return it->second.traded[cursor_ - it->second.start_index];
+}
+
 Timestamp DataHandler::current_time() const {
     if (cursor_ == kBeforeStart) {
         throw std::logic_error("DataHandler::current_time called before the first advance");

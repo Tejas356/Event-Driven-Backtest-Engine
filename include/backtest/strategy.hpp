@@ -32,8 +32,19 @@ public:
     // Called once per market event. The DataHandler is const and bounded to
     // the current simulation time, so every symbol is reachable through
     // latest_bars() but no future bar is.
+    //
+    // Suitable for a single-symbol strategy. A portfolio strategy should use
+    // on_bar_close instead: market events arrive one symbol at a time, so a
+    // strategy that sizes the whole book here would be doing it while most of
+    // the universe is still marked at yesterday prices.
     virtual std::vector<SignalEvent> on_market(const MarketEvent& event,
                                                const DataHandler& data) = 0;
+
+    // Called once per timestamp, after every market event at that timestamp
+    // has been processed. By this point the whole universe is marked to
+    // market at today close, so weights computed here compare like with like.
+    // Still bounded to the current simulation time: nothing later exists yet.
+    virtual std::vector<SignalEvent> on_bar_close(Timestamp, const DataHandler&) { return {}; }
 
     virtual const char* name() const noexcept = 0;
 };

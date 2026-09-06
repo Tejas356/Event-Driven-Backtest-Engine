@@ -31,3 +31,54 @@ drawdown around 55%), so the harness is trusted from here.
 
 No parameters were varied. The costless run is deliberate: it isolates the
 accounting from the cost model.
+
+---
+
+## Step 10 -- inverse-volatility sizing
+
+Config: lookback 252, EWMA halflife 60 (seed 20), volatility target 10% per
+position, gross cap 2.0, deadband 5bp of equity, **daily** rebalancing.
+Monthly is Step 11; daily is recorded here as the comparison.
+
+| | No costs | 2bp round trip |
+|---|---|---|
+| Annualised return | 1.75% | 1.64% |
+| Annualised volatility | 4.76% | 4.76% |
+| Net Sharpe | -0.031 | -0.054 |
+| Max drawdown | 11.1% (1173 days) | 11.2% (1180 days) |
+| Annualised turnover | 1087% | 1087% |
+| Mean / max gross exposure | 0.79 / 1.33 | 0.79 / 1.33 |
+
+Realised volatility of 4.76% against a diversified target of
+10%/sqrt(8) = 3.54%: within the 3 percentage points allowed, and above it in
+the direction the positive correlation between trend positions predicts.
+
+Turnover of 1087% a year is the thing to notice. Daily rebalancing churns the
+book on volatility-estimate wiggles that carry no signal. Step 11 is the fix.
+
+Sharpe is slightly negative here. Not tuned away -- this is what daily
+rebalancing produces, and it is recorded rather than quietly dropped.
+
+### Bug found and fixed: stale prices at signal time
+
+The first version raised all eight signals from `on_market`, on the first
+market event of each day. Market events arrive one symbol at a time, so seven
+of the eight were being sized against yesterday closes and a stale equity.
+
+Consequences, before the fix:
+
+| | Before | After |
+|---|---|---|
+| Max gross exposure | 10.83 (cap 2.0) | 1.33 |
+| Worst daily return | +513% | +1.9% |
+| Costs on a 1,000,000 book | 1,026,250 | 23,870 |
+| Traded notional | 10.26bn | 239m |
+| Final equity | 31,148 | 1,377,304 |
+
+Fixed by adding `Strategy::on_bar_close`, called once per timestamp after
+every market event at that timestamp has been processed, so the whole
+universe is marked at the same close before any weight is computed. The
+per-symbol `on_market` hook remains for single-symbol strategies.
+
+Worth recording because the failure mode was not a crash: it was a plausible
+looking backtest that had quietly destroyed 97% of the capital.

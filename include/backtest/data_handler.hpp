@@ -55,6 +55,13 @@ public:
     // Throws if called before the first advance().
     Timestamp current_time() const;
 
+    // Whether this symbol genuinely traded at the current simulation time,
+    // as opposed to being forward-filled or not yet listed. This describes
+    // the current bar, never a later one, so it reveals nothing about the
+    // future -- but without it a volatility estimator would be fed a
+    // fabricated zero return on every non-trading day and read too low.
+    bool traded(const Symbol& symbol) const;
+
     const std::vector<Symbol>& symbols() const noexcept { return symbols_; }
 
     // Number of timestamps on the union timeline. This is a property of the
