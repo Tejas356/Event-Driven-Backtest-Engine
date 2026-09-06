@@ -23,3 +23,4 @@ function(add_backtest_test name)
 endfunction()
 
 add_backtest_test(test_types test_types.cpp)
+add_backtest_test(test_event_queue test_event_queue.cpp)
