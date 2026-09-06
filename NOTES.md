@@ -82,3 +82,56 @@ per-symbol `on_market` hook remains for single-symbol strategies.
 
 Worth recording because the failure mode was not a crash: it was a plausible
 looking backtest that had quietly destroyed 97% of the capital.
+
+---
+
+## Step 11 -- monthly rebalancing
+
+Same configuration as Step 10, schedule changed to the last trading day of
+each month. 237 rebalances over 4950 bars.
+
+| | Daily | Monthly |
+|---|---|---|
+| Annualised return (net) | 1.64% | 1.95% |
+| Annualised volatility | 4.76% | 4.83% |
+| Net Sharpe (rf 2%) | -0.054 | +0.009 |
+| Max drawdown | 11.2% (1180 days) | 12.9% (1599 days) |
+| Annualised turnover | 1087% | 259% |
+| Costs on 1,000,000 | 23,870 | 5,863 |
+| Skew | -0.47 | -0.19 |
+
+Turnover falls 4.2x and lands inside the 200-500% the plan expects. Daily
+rebalancing was churning the book on volatility-estimate wiggles carrying no
+signal, and paying for it. Monthly is better before costs as well as after,
+so this is not merely a cost saving.
+
+Calendar-year returns, confirming the strategy behaves like trend following
+rather than like a bug:
+
+    2008 +8.56%   2016 -5.47%
+    2009 -3.50%   2017 +5.90%
+    2010 -1.39%   2018 -5.98%
+    2011 +2.93%   2019 +2.99%
+    2012 +0.53%   2020 +1.17%
+    2013 +7.72%   2021 -1.51%
+    2014 +0.26%   2022 +7.20%
+    2015 +4.89%   2023 -1.09%
+
+2008 and 2022 are the two years trend following is supposed to win, and it
+does. The flat-to-negative 2009-2012 whipsaw and the mediocre 2010-2019 are
+also exactly what the literature reports.
+
+### Open question for Step 12: the risk-free rate is being double-counted
+
+The book runs at a mean gross exposure of 0.79, so most of the capital sits
+in cash -- and the engine credits no interest on it. The Sharpe then
+subtracts a 2% risk-free rate anyway, charging for a cash return that was
+never earned.
+
+At rf = 0%, which treats the equity curve as the excess-of-cash series it
+effectively is, the net Sharpe is around 0.4. At rf = 2% it is 0.01. The
+honest figure is between the two, nearer the former.
+
+Not resolved by quietly picking the flattering number. Step 12 reports both
+and says why; a financing model is out of scope and is listed as a
+limitation.

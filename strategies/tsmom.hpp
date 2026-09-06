@@ -11,11 +11,20 @@
 
 namespace backtest {
 
+// How often targets are recomputed. Positions drift with prices in between,
+// which is correct -- rebalancing back to target every day multiplies
+// turnover several-fold in exchange for a signal that has barely moved.
+enum class RebalanceFrequency {
+    Daily,
+    MonthEnd,
+};
+
 struct TsmomConfig {
     std::size_t lookback = 252;
     double volatility_halflife = 60.0;
     std::size_t volatility_seed = 20;
     SizingConfig sizing{};
+    RebalanceFrequency frequency = RebalanceFrequency::MonthEnd;
 };
 
 // Time-series momentum across a universe: sign of the trailing return,
@@ -43,11 +52,17 @@ public:
     }
 
     std::vector<SignalEvent> on_bar_close(Timestamp ts, const DataHandler& data) override {
+        // Volatility updates every day regardless of the schedule: the
+        // estimator should see every return, even on days no trade results.
         update_volatility(data);
 
-        // Rebalanced every day. Step 11 introduces the month-end schedule,
-        // which is what the strategy actually runs on; daily is kept as the
-        // comparison that makes the turnover argument concrete.
+        if (config_.frequency == RebalanceFrequency::MonthEnd &&
+            !data.is_last_trading_day_of_month()) {
+            // Between rebalances the book drifts with prices, which is the
+            // intended behaviour and not a gap in the logic.
+            return {};
+        }
+
         ++rebalances_;
         return build_signals(ts, data);
     }

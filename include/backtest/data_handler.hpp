@@ -62,6 +62,22 @@ public:
     // fabricated zero return on every non-trading day and read too low.
     bool traded(const Symbol& symbol) const;
 
+    // Whether the current bar is the last trading day of its month.
+    //
+    // This is the one place the handler consults the next entry on the
+    // timeline, and it reads only its *date*. That is not look-ahead: an
+    // exchange publishes its holiday calendar years ahead, so a desk running
+    // this live on the 31st knows perfectly well that the 1st is next. Prices
+    // are the thing that cannot be known in advance, and no price is exposed
+    // here -- latest_bars remains the only way to reach one, still clamped to
+    // the cursor.
+    //
+    // The alternative, rebalancing on the first trading day of a new month,
+    // needs no calendar at all and would keep the no-future property free of
+    // any caveat. It was not chosen because it trades a day later than the
+    // convention the literature reports, for no benefit beyond tidiness.
+    bool is_last_trading_day_of_month() const;
+
     const std::vector<Symbol>& symbols() const noexcept { return symbols_; }
 
     // Number of timestamps on the union timeline. This is a property of the

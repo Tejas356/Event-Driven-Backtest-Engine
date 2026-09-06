@@ -278,6 +278,22 @@ bool DataHandler::traded(const Symbol& symbol) const {
     return it->second.traded[cursor_ - it->second.start_index];
 }
 
+bool DataHandler::is_last_trading_day_of_month() const {
+    if (cursor_ == kBeforeStart || timeline_.empty()) {
+        return false;
+    }
+    // The final bar of the sample ends its month by definition.
+    if (cursor_ + 1 >= timeline_.size()) {
+        return true;
+    }
+    // Asking the calendar for the 31st would miss every month ending on a
+    // weekend or a holiday, which is most of them. The last trading day is
+    // the one whose successor falls in a different month.
+    const std::chrono::year_month_day today{timeline_[cursor_]};
+    const std::chrono::year_month_day tomorrow{timeline_[cursor_ + 1]};
+    return today.month() != tomorrow.month() || today.year() != tomorrow.year();
+}
+
 Timestamp DataHandler::current_time() const {
     if (cursor_ == kBeforeStart) {
         throw std::logic_error("DataHandler::current_time called before the first advance");
