@@ -4,6 +4,20 @@ An event-driven backtesting engine in C++20, built so that look-ahead bias is
 structurally impossible rather than merely avoided by careful coding. A time-series
 momentum strategy runs on top of it as a validation case.
 
+**The engine is the deliverable.** The strategy is the thing that proves it works.
+
+At a glance: 102 tests, O(1) rolling statistics, and a harness validated against an
+independent pandas implementation to 2.6e-16 before any strategy result was computed.
+Eight ETFs over 19.6 years return 1.95% a year net of costs at 4.83% volatility, a
+Sharpe of 0.42 once the cash-drag double-count is removed, a 12.87% drawdown that took
+1599 days to recover, and 259% annual turnover. Every lookback from 63 to 378 days
+produces a positive Sharpe between 0.42 and 0.62, so the result does not depend on the
+parameter being right.
+
+That is a modest strategy result reported honestly, which is rather the point:
+[`NOTES.md`](NOTES.md) logs all 22 parameter variations tried, and the limitations
+section says what the backtest leaves out.
+
 ---
 
 ## The design claim
@@ -99,6 +113,8 @@ apps/                 backtest runner, parameter sweep, harness validation
 tests/                102 tests, including the look-ahead test
 analysis/             python plotting and independent validation
 data/                 fetch script (CSVs are gitignored)
+config/               run parameters
+NOTES.md              every parameter variation tried, and what it produced
 ```
 
 ---
