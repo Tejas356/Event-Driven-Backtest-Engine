@@ -1,0 +1,10 @@
+@"
+build/
+data/*.csv
+results/
+.vscode/
+*.o
+*.obj
+CMakeCache.txt
+CMakeFiles/
+"@ | Out-File -Encoding utf8 .gitignore
