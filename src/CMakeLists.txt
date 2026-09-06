@@ -3,6 +3,7 @@ add_library(backtest STATIC
     data_handler.cpp
     engine.cpp
     execution.cpp
+    metrics.cpp
     portfolio.cpp
     summary.cpp
     version.cpp
