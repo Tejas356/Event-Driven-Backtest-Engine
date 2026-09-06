@@ -22,4 +22,4 @@ function(add_backtest_test name)
     gtest_discover_tests(${name})
 endfunction()
 
-# Test executables are added from Step 2 onwards.
+add_backtest_test(test_types test_types.cpp)
